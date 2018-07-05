@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Moq;
 using NUnit.Framework;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Lykke.Backoffice.Common.Tests
@@ -18,7 +19,33 @@ namespace Lykke.Backoffice.Common.Tests
             RequestDelegateMock
                 .Setup(x => x.RequestDelegate(It.IsAny<HttpContext>()))
                 .Returns(Task.FromResult(0));
-            _middleware = new CheckBrowserMiddleware(RequestDelegateMock.Object.RequestDelegate);
+
+            var list = new List<Browser>();
+            var browser = new Browser()
+            {
+                Name = "Chrome",
+                MinMajorVersion = 25
+            };
+            list.Add(browser);
+            browser = new Browser()
+            {
+                Name = "Firefox",
+                MinMajorVersion = 23
+            };
+            list.Add(browser);
+            browser = new Browser()
+            {
+                Name = "Safari",
+                MinMajorVersion = 7
+            };
+            list.Add(browser);
+            browser = new Browser()
+            {
+                Name = "Edge",
+                MinMajorVersion = 13
+            };
+            list.Add(browser);
+            _middleware = new CheckBrowserMiddleware(RequestDelegateMock.Object.RequestDelegate, list);
         }
 
         [TestCase("1dfdf", ExpectedResult = 403)]

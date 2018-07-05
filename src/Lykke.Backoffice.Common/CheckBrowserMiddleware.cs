@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Lykke.Backoffice.Common
@@ -12,20 +13,16 @@ namespace Lykke.Backoffice.Common
     public class CheckBrowserMiddleware
     {
         private readonly RequestDelegate _next;
-        private IDictionary<string, int> BrowserMajorVarsionMap = new Dictionary<string, int>
-        {
-            {"Chrome", 25},
-            {"Firefox", 23},
-            {"Safari", 7},
-            {"Edge", 13},
-        };
+        private readonly IEnumerable<Browser> _browsers;
         /// <summary>
         /// Ctor
         /// </summary>
         /// <param name="next"></param>
-        public CheckBrowserMiddleware(RequestDelegate next)
+        /// <param name="browsers"></param>
+        public CheckBrowserMiddleware(RequestDelegate next, IEnumerable<Browser> browsers)
         {
             _next = next;
+            _browsers = browsers;
         }
         /// <summary>
         /// Invoke method
@@ -47,9 +44,20 @@ namespace Lykke.Backoffice.Common
         }
         private bool CheckBrowserMajorVersion(string name, string useragentVersion)
         {
-            if (string.IsNullOrWhiteSpace(name) || !BrowserMajorVarsionMap.TryGetValue(name, out var version))
+            if (string.IsNullOrWhiteSpace(name))
                 return false;
-            return Convert.ToInt32(useragentVersion) > version;
+            var browser = _browsers.FirstOrDefault(x => x.Name == name);
+            if (browser == null)
+                return false;
+            if (browser.MaxMajorVersion != null && browser.MinMajorVersion != null)
+                return (Convert.ToInt32(useragentVersion) > browser.MinMajorVersion && Convert.ToInt32(useragentVersion) < browser.MaxMajorVersion);
+            if (browser.MinMajorVersion == null && browser.MaxMajorVersion == null)
+                return false;
+            if (browser.MaxMajorVersion == null && browser.MinMajorVersion != null)
+                return Convert.ToInt32(useragentVersion) > browser.MinMajorVersion;
+            if (browser.MaxMajorVersion != null && browser.MinMajorVersion == null)
+                return Convert.ToInt32(useragentVersion) < browser.MaxMajorVersion;
+            return false;
         }
     }
 }
