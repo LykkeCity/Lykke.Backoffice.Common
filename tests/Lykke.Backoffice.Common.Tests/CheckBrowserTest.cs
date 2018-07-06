@@ -24,25 +24,25 @@ namespace Lykke.Backoffice.Common.Tests
             var browser = new Browser()
             {
                 Name = "Chrome",
-                MinMajorVersion = 25
+                MinMajorVersion = "25"
             };
             list.Add(browser);
             browser = new Browser()
             {
                 Name = "Firefox",
-                MinMajorVersion = 23
+                MinMajorVersion = "23"
             };
             list.Add(browser);
             browser = new Browser()
             {
                 Name = "Safari",
-                MinMajorVersion = 7
+                MinMajorVersion = "7"
             };
             list.Add(browser);
             browser = new Browser()
             {
                 Name = "Edge",
-                MinMajorVersion = 13
+                MinMajorVersion = "13"
             };
             list.Add(browser);
             _middleware = new CheckBrowserMiddleware(RequestDelegateMock.Object.RequestDelegate, list);
