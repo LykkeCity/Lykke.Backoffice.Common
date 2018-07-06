@@ -49,15 +49,23 @@ namespace Lykke.Backoffice.Common
             var browser = _browsers.FirstOrDefault(x => x.Name == name);
             if (browser == null)
                 return false;
-            if (browser.MaxMajorVersion != null && browser.MinMajorVersion != null)
-                return (Convert.ToInt32(useragentVersion) > browser.MinMajorVersion && Convert.ToInt32(useragentVersion) < browser.MaxMajorVersion);
-            if (browser.MinMajorVersion == null && browser.MaxMajorVersion == null)
+            var minVersion = TryParseNullable(browser.MinMajorVersion);
+            var maxVersion = TryParseNullable(browser.MaxMajorVersion);
+
+            if (minVersion != null && maxVersion != null)
+                return (Convert.ToInt32(useragentVersion) > minVersion && Convert.ToInt32(useragentVersion) < maxVersion);
+            if (minVersion == null && maxVersion == null)
                 return false;
-            if (browser.MaxMajorVersion == null && browser.MinMajorVersion != null)
-                return Convert.ToInt32(useragentVersion) > browser.MinMajorVersion;
-            if (browser.MaxMajorVersion != null && browser.MinMajorVersion == null)
-                return Convert.ToInt32(useragentVersion) < browser.MaxMajorVersion;
+            if (maxVersion == null && minVersion != null)
+                return Convert.ToInt32(useragentVersion) > minVersion;
+            if (maxVersion != null && minVersion == null)
+                return Convert.ToInt32(useragentVersion) < maxVersion;
             return false;
+        }
+        private int? TryParseNullable(string val)
+        {
+            int outValue;
+            return int.TryParse(val, out outValue) ? (int?)outValue : null;
         }
     }
 }
