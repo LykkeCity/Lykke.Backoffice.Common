@@ -50,10 +50,7 @@ namespace Lykke.Backoffice.Common.Tests
             };
             list.Add(browser);
 
-            var skipUrls = new List<string>();
-            skipUrls.Add("/api/isalive");
-            skipUrls.Add("/api/test");
-
+            var skipUrls = new string[] { "/api/isalive", "/api/test" };
             _middleware = new CheckBrowserMiddleware(RequestDelegateMock.Object.RequestDelegate, list, skipUrls);
         }
 

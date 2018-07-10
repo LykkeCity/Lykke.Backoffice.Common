@@ -25,12 +25,11 @@ namespace Lykke.Backoffice.Common
         {
             _next = next;
             _browsers = browsers;
-            var urls = new List<string>();
-            urls.Add("/api/isalive");
+            var urls = new string[] { "/api/isalive" };
             _skipUrls = urls;
         }
         /// <summary>
-        /// 
+        /// ctor with skiped urls
         /// </summary>
         /// <param name="next"></param>
         /// <param name="browsers"></param>
