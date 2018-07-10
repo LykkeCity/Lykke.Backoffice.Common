@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Lykke.Backoffice.Common
@@ -63,7 +64,10 @@ namespace Lykke.Backoffice.Common
             if (!supportedBrowser)
             {
                 context.Response.StatusCode = 403;
-                context.Response.WriteAsync("<html><div>Forbidden</div></html>");
+                var sb = new StringBuilder();
+                foreach (var browser in _browsers)
+                    sb.AppendLine(string.Format("{0} min version: '{1}', max version: '{2}'", browser.Name, browser.MinMajorVersion, browser.MaxMajorVersion));
+                context.Response.WriteAsync(string.Format("<html><div>Forbidden, because your browser does not meet safety requirements. Following browsers are allowed:</div><div>{0}</div></html>", sb.ToString()));
             }
             return _next(context);
         }
