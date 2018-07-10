@@ -49,7 +49,12 @@ namespace Lykke.Backoffice.Common.Tests
                 MaxMajorVersion = "20"
             };
             list.Add(browser);
-            _middleware = new CheckBrowserMiddleware(RequestDelegateMock.Object.RequestDelegate, list);
+
+            var skipUrls = new List<string>();
+            skipUrls.Add("/api/isalive");
+            skipUrls.Add("/api/test");
+
+            _middleware = new CheckBrowserMiddleware(RequestDelegateMock.Object.RequestDelegate, list, skipUrls);
         }
 
         [TestCase("1dfdf", ExpectedResult = 403)]

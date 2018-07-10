@@ -14,15 +14,19 @@ namespace Lykke.Backoffice.Common
     {
         private readonly RequestDelegate _next;
         private readonly IEnumerable<Browser> _browsers;
+        private readonly IEnumerable<string> _skipUrls;
         /// <summary>
         /// Ctor
         /// </summary>
         /// <param name="next"></param>
         /// <param name="browsers"></param>
-        public CheckBrowserMiddleware(RequestDelegate next, IEnumerable<Browser> browsers)
+        public CheckBrowserMiddleware(RequestDelegate next, IEnumerable<Browser> browsers, IEnumerable<string> skipUrls)
         {
             _next = next;
             _browsers = browsers;
+            _skipUrls = skipUrls;
+            if (_skipUrls.Any())
+                _skipUrls.Append("/api/isalive");
         }
         /// <summary>
         /// Invoke method
@@ -31,6 +35,12 @@ namespace Lykke.Backoffice.Common
         /// <returns></returns>
         public Task Invoke(HttpContext context)
         {
+            if (context.Request.Path.HasValue && _skipUrls.Contains(context.Request.Path.Value.ToLower()))
+            {
+                context.Response.StatusCode = 200;
+                return _next(context);
+            }
+
             var useragentHeader = context.Request.Headers["User-Agent"];
             var useragent = new UserAgent(useragentHeader);
             var supportedBrowser = CheckBrowserMajorVersion(useragent.Browser.Name, useragent.Browser.Major);
