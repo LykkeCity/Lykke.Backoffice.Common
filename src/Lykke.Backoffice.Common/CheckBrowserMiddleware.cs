@@ -25,7 +25,7 @@ namespace Lykke.Backoffice.Common
         {
             _next = next;
             _browsers = browsers;
-            var urls = new string[] { "/api/isalive" };
+            var urls = new [] { "/api/isalive" };
             _skipUrls = urls;
         }
         /// <summary>
@@ -45,15 +45,14 @@ namespace Lykke.Backoffice.Common
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context)
         {
-            if (context != null && context.Request != null &&
-                context.Request.Path != null &&
-                context.Request.Path.HasValue 
-                && _skipUrls.Contains(context.Request.Path.Value.ToLower()))
+            var path = context?.Request?.Path.Value;
+            if (!string.IsNullOrEmpty(path) && _skipUrls.Contains(path.ToLower()))
             {
+                
                 context.Response.StatusCode = 200;
-                return _next(context);
+                await _next(context);
             }
 
             var useragentHeader = context.Request.Headers["User-Agent"];
@@ -66,9 +65,9 @@ namespace Lykke.Backoffice.Common
                 var sb = new StringBuilder();
                 foreach (var browser in _browsers)
                     sb.AppendLine(string.Format("{0} min version: '{1}', max version: '{2}'", browser.Name, browser.MinMajorVersion, browser.MaxMajorVersion));
-                context.Response.WriteAsync(string.Format("<html><div>Forbidden, because your browser does not meet safety requirements. Following browsers are allowed:</div><div>{0}</div></html>", sb.ToString()));
+                await context.Response.WriteAsync(string.Format("<html><div>Forbidden, because your browser does not meet safety requirements. Following browsers are allowed:</div><div>{0}</div></html>", sb.ToString()));
             }
-            return _next(context);
+            await _next(context);
         }
         private bool CheckBrowserMajorVersion(string name, string useragentVersion)
         {
