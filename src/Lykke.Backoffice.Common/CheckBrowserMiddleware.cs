@@ -20,13 +20,25 @@ namespace Lykke.Backoffice.Common
         /// </summary>
         /// <param name="next"></param>
         /// <param name="browsers"></param>
+        public CheckBrowserMiddleware(RequestDelegate next, IEnumerable<Browser> browsers)
+        {
+            _next = next;
+            _browsers = browsers;
+            var urls = new List<string>();
+            urls.Add("/api/isalive");
+            _skipUrls = urls;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="next"></param>
+        /// <param name="browsers"></param>
+        /// <param name="skipUrls"></param>
         public CheckBrowserMiddleware(RequestDelegate next, IEnumerable<Browser> browsers, IEnumerable<string> skipUrls)
         {
             _next = next;
             _browsers = browsers;
             _skipUrls = skipUrls;
-            if (_skipUrls.Any())
-                _skipUrls.Append("/api/isalive");
         }
         /// <summary>
         /// Invoke method
