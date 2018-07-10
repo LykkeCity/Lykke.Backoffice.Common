@@ -47,7 +47,10 @@ namespace Lykke.Backoffice.Common
         /// <returns></returns>
         public Task Invoke(HttpContext context)
         {
-            if (context.Request.Path.HasValue && _skipUrls.Contains(context.Request.Path.Value.ToLower()))
+            if (context != null && context.Request != null &&
+                context.Request.Path != null &&
+                context.Request.Path.HasValue 
+                && _skipUrls.Contains(context.Request.Path.Value.ToLower()))
             {
                 context.Response.StatusCode = 200;
                 return _next(context);
