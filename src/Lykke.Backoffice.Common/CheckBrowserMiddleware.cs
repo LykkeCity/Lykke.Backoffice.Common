@@ -67,7 +67,7 @@ namespace Lykke.Backoffice.Common
                 context.Response.StatusCode = 403;
                 var sb = new StringBuilder();
                 foreach (var browser in _browsers)
-                    sb.AppendFormat(TemplateBrowser, browser.Name, browser.MinMajorVersion, browser.MaxMajorVersion);
+                    sb.AppendFormat(TemplateBrowser, browser.Name, browser.MinMajorVersion, browser.MaxMajorVersion, Environment.NewLine);
                 await context.Response.WriteAsync(string.Format(TemplateMessage, sb.ToString()));
             }
             await _next(context);
