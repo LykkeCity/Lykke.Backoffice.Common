@@ -74,7 +74,7 @@ namespace Lykke.Backoffice.Common
         }
         private bool CheckBrowserMajorVersion(string name, string useragentVersion)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(useragentVersion))
                 return false;
             var browser = _browsers.FirstOrDefault(x => x.Name == name);
             if (browser == null)
