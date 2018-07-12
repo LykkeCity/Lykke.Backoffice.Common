@@ -16,6 +16,9 @@ namespace Lykke.Backoffice.Common
         private readonly RequestDelegate _next;
         private readonly IEnumerable<Browser> _browsers;
         private readonly IEnumerable<string> _skipUrls;
+
+        private const string TemplateMessage = "<html><div>Forbidden, because your browser does not meet safety requirements. Following browsers are allowed:</div><div>{0}</div></html>";
+        private const string TemplateBrowser = "<div>{0} min version: '{1}', max version: '{2}'</div>{3}";
         /// <summary>
         /// Ctor
         /// </summary>
@@ -64,14 +67,14 @@ namespace Lykke.Backoffice.Common
                 context.Response.StatusCode = 403;
                 var sb = new StringBuilder();
                 foreach (var browser in _browsers)
-                    sb.AppendLine(string.Format("{0} min version: '{1}', max version: '{2}'", browser.Name, browser.MinMajorVersion, browser.MaxMajorVersion));
-                await context.Response.WriteAsync(string.Format("<html><div>Forbidden, because your browser does not meet safety requirements. Following browsers are allowed:</div><div>{0}</div></html>", sb.ToString()));
+                    sb.AppendFormat(TemplateBrowser, browser.Name, browser.MinMajorVersion, browser.MaxMajorVersion, Environment.NewLine);
+                await context.Response.WriteAsync(string.Format(TemplateMessage, sb.ToString()));
             }
             await _next(context);
         }
         private bool CheckBrowserMajorVersion(string name, string useragentVersion)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(useragentVersion))
                 return false;
             var browser = _browsers.FirstOrDefault(x => x.Name == name);
             if (browser == null)
@@ -80,13 +83,13 @@ namespace Lykke.Backoffice.Common
             var maxVersion = TryParseNullable(browser.MaxMajorVersion);
 
             if (minVersion != null && maxVersion != null)
-                return (Convert.ToInt32(useragentVersion) > minVersion && Convert.ToInt32(useragentVersion) < maxVersion);
+                return (Convert.ToInt32(useragentVersion) >= minVersion && Convert.ToInt32(useragentVersion) <= maxVersion);
             if (minVersion == null && maxVersion == null)
                 return false;
             if (maxVersion == null && minVersion != null)
-                return Convert.ToInt32(useragentVersion) > minVersion;
+                return Convert.ToInt32(useragentVersion) >= minVersion;
             if (maxVersion != null && minVersion == null)
-                return Convert.ToInt32(useragentVersion) < maxVersion;
+                return Convert.ToInt32(useragentVersion) <= maxVersion;
             return false;
         }
         private int? TryParseNullable(string val)

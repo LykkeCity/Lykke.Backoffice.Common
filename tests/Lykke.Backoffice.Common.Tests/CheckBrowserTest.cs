@@ -25,28 +25,28 @@ namespace Lykke.Backoffice.Common.Tests
             {
                 Name = "Chrome",
                 MinMajorVersion = "25",
-                MaxMajorVersion = "70"
+                MaxMajorVersion = "69"
             };
             list.Add(browser);
             browser = new Browser()
             {
                 Name = "Firefox",
                 MinMajorVersion = "23",
-                MaxMajorVersion = "70"
+                MaxMajorVersion = "69"
             };
             list.Add(browser);
             browser = new Browser()
             {
                 Name = "Safari",
                 MinMajorVersion = "7",
-                MaxMajorVersion = "13"
+                MaxMajorVersion = "12"
             };
             list.Add(browser);
             browser = new Browser()
             {
                 Name = "Edge",
                 MinMajorVersion = "13",
-                MaxMajorVersion = "20"
+                MaxMajorVersion = "19"
             };
             list.Add(browser);
 
