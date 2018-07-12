@@ -18,7 +18,7 @@ namespace Lykke.Backoffice.Common
         private readonly IEnumerable<string> _skipUrls;
 
         private const string TemplateMessage = "<html><div>Forbidden, because your browser does not meet safety requirements. Following browsers are allowed:</div><div>{0}</div></html>";
-        private const string TemplateBrowser = "<div>{0} min version: '{1}', max version: '{2}'</div>";
+        private const string TemplateBrowser = "<div>{0} min version: '{1}', max version: '{2}'</div>{3}";
         /// <summary>
         /// Ctor
         /// </summary>
