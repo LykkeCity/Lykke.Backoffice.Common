@@ -64,7 +64,7 @@ namespace Lykke.Backoffice.Common
                 context.Response.StatusCode = 403;
                 var sb = new StringBuilder();
                 foreach (var browser in _browsers)
-                    sb.AppendLine(string.Format("{0} min version: '{1}', max version: '{2}'", browser.Name, browser.MinMajorVersion, browser.MaxMajorVersion));
+                    sb.AppendLine(string.Format("<div>{0} min version: '{1}', max version: '{2}'</div>", browser.Name, browser.MinMajorVersion, browser.MaxMajorVersion));
                 await context.Response.WriteAsync(string.Format("<html><div>Forbidden, because your browser does not meet safety requirements. Following browsers are allowed:</div><div>{0}</div></html>", sb.ToString()));
             }
             await _next(context);
@@ -80,13 +80,13 @@ namespace Lykke.Backoffice.Common
             var maxVersion = TryParseNullable(browser.MaxMajorVersion);
 
             if (minVersion != null && maxVersion != null)
-                return (Convert.ToInt32(useragentVersion) > minVersion && Convert.ToInt32(useragentVersion) < maxVersion);
+                return (Convert.ToInt32(useragentVersion) >= minVersion && Convert.ToInt32(useragentVersion) <= maxVersion);
             if (minVersion == null && maxVersion == null)
                 return false;
             if (maxVersion == null && minVersion != null)
-                return Convert.ToInt32(useragentVersion) > minVersion;
+                return Convert.ToInt32(useragentVersion) >= minVersion;
             if (maxVersion != null && minVersion == null)
-                return Convert.ToInt32(useragentVersion) < maxVersion;
+                return Convert.ToInt32(useragentVersion) <= maxVersion;
             return false;
         }
         private int? TryParseNullable(string val)
