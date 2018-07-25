@@ -53,22 +53,26 @@ namespace Lykke.Backoffice.Common
             var path = context?.Request?.Path.Value;
             if (!string.IsNullOrEmpty(path) && _skipUrls.Contains(path.ToLower()))
             {
-                
                 context.Response.StatusCode = 200;
                 await _next(context);
+                return;
             }
 
-            var useragentHeader = context.Request.Headers["User-Agent"];
+            var useragentHeader = context?.Request?.Headers["User-Agent"];
             var useragent = new UserAgent(useragentHeader);
             var supportedBrowser = CheckBrowserMajorVersion(useragent.Browser.Name, useragent.Browser.Major);
             context.Response.StatusCode = 200;
             if (!supportedBrowser)
             {
                 context.Response.StatusCode = 403;
+
+                context.Response.Headers.Add("User-Agent", useragentHeader.GetValueOrDefault());
+                context.Response.ContentType = "text/html; charset=utf-8";
                 var sb = new StringBuilder();
                 foreach (var browser in _browsers)
                     sb.AppendFormat(TemplateBrowser, browser.Name, browser.MinMajorVersion, browser.MaxMajorVersion, Environment.NewLine);
                 await context.Response.WriteAsync(string.Format(TemplateMessage, sb.ToString()));
+                return;
             }
             await _next(context);
         }
