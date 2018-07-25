@@ -17,7 +17,7 @@ namespace Lykke.Backoffice.Common
         private readonly IEnumerable<Browser> _browsers;
         private readonly IEnumerable<string> _skipUrls;
 
-        private const string TemplateMessage = "<html><div>Forbidden, because your browser does not meet safety requirements. Following browsers are allowed:</div><div>{0}</div></html>";
+        private const string TemplateMessage = "<html><div>Forbidden, because your browser does not meet safety requirements.<br/> User-Agent: {1} <br/>Following browsers are allowed:</div><div>{0}</div></html>";
         private const string TemplateBrowser = "<div>{0} min version: '{1}', max version: '{2}'</div>{3}";
         /// <summary>
         /// Ctor
@@ -53,22 +53,24 @@ namespace Lykke.Backoffice.Common
             var path = context?.Request?.Path.Value;
             if (!string.IsNullOrEmpty(path) && _skipUrls.Contains(path.ToLower()))
             {
-                
                 context.Response.StatusCode = 200;
                 await _next(context);
+                return;
             }
 
-            var useragentHeader = context.Request.Headers["User-Agent"];
+            var useragentHeader = context?.Request?.Headers["User-Agent"];
             var useragent = new UserAgent(useragentHeader);
             var supportedBrowser = CheckBrowserMajorVersion(useragent.Browser.Name, useragent.Browser.Major);
             context.Response.StatusCode = 200;
             if (!supportedBrowser)
             {
                 context.Response.StatusCode = 403;
+                context.Response.ContentType = "text/html; charset=utf-8";
                 var sb = new StringBuilder();
                 foreach (var browser in _browsers)
                     sb.AppendFormat(TemplateBrowser, browser.Name, browser.MinMajorVersion, browser.MaxMajorVersion, Environment.NewLine);
-                await context.Response.WriteAsync(string.Format(TemplateMessage, sb.ToString()));
+                await context.Response.WriteAsync(string.Format(TemplateMessage, sb.ToString(), useragentHeader.GetValueOrDefault()));
+                return;
             }
             await _next(context);
         }
